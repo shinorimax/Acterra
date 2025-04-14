@@ -1,3 +1,6 @@
+# Data file
+data/
+
 # Ignore virtual environments
 venv/
 
