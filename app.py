@@ -55,7 +55,7 @@ app.layout = html.Div([
         html.Div([
             dcc.Graph(id='plan_comparison', style={'height': '500px'})
         ], style={
-            'width': '35%', 
+            'width': '40%', 
             'padding': '5px',
             'boxSizing': 'border-box'
         }),
@@ -64,7 +64,7 @@ app.layout = html.Div([
         html.Div([
             dcc.Graph(id='power_mix_pie', style={'height': '500px'})
         ], style={
-            'width': '35%',
+            'width': '40%',
             'padding': '5px',
             'boxSizing': 'border-box'
         })
@@ -139,7 +139,6 @@ app.layout = html.Div([
 #     'padding': '10px'
 # })
 
-# Callback: Update bar chart + plan dropdown
 @app.callback(
     [Output('plan_comparison', 'figure'),
      Output('plan_selector', 'options'),
@@ -178,37 +177,39 @@ def update_bar_and_dropdown(zip_code, kwh_usage, therms_usage, gas_allowance):
     # Match gas cost to length of plans (assume same for all)
     gas_costs = [gas_total] * len(plans)
 
-    # First: Electricity (bottom layer)
+    # First: Electricity (bottom layer of stack)
     fig.add_trace(go.Bar(
         x=plans['plan'],
         y=electricity_costs,
         name='Electricity Cost',
-        marker_color='#3498db',  # Deeper blue for better visibility
-        width=0.3,  # Slightly wider bars
-        yaxis='y',
-        offsetgroup=0
+        marker_color='#3498db',
+        width=0.35,  # Slightly narrower to accommodate emissions bar
+        offsetgroup='costs',
+        offset=-0.2  # Shift left to make room for emissions
     ))
 
-    # Second: Gas (top layer)
+    # Second: Gas (stacked on top of electricity)
     fig.add_trace(go.Bar(
         x=plans['plan'],
         y=gas_costs,
         name='Gas Cost',
-        marker_color='#e67e22',  # Darker orange
-        width=0.3,
-        yaxis='y',
-        offsetgroup=0
+        marker_color='#e67e22',
+        width=0.35,
+        offsetgroup='costs',
+        offset=-0.2  # Align with electricity
     ))
 
+    # Emissions bar (positioned to the right of the stacked bars)
     fig.add_trace(go.Bar(
         x=plans['plan'],
         y=plans['emissions_g_per_kwh'] * kwh_usage / 1000,
         name='Monthly Emissions (kg CO₂)',
-        marker_color='#e74c3c',  # Stronger red
-        width=0.3,
-        yaxis='y2',
-        offsetgroup=1,
-        opacity=0.85  # Slight transparency for better differentiation
+        marker_color='#e74c3c',
+        width=0.25,  # Narrower to fit beside costs
+        offsetgroup='emissions',
+        offset=0.15,  # Shift right to avoid overlap
+        opacity=0.85,
+        yaxis='y2'
     ))
 
     # Update layout with improved readability
@@ -217,10 +218,9 @@ def update_bar_and_dropdown(zip_code, kwh_usage, therms_usage, gas_allowance):
             'text': f"Energy Rate Plans for ZIP {zip_code}",
             'font': {'size': 22, 'family': 'Arial, sans-serif'}
         },
-        # width=700,  # Wider plot
-        # height=500,  # Taller plot
-        bargap=0.3,  # More space between bar groups
-        bargroupgap=0.1,  # More space between bars in a group
+        barmode='stack',  # Stack electricity and gas bars
+        bargap=0.4,  # Increased gap between plan groups for clarity
+        bargroupgap=0.1,  # Space between bars in a group
         yaxis=dict(
             title={'text': 'Monthly Cost ($)', 'font': {'size': 16}},
             side='left',
@@ -231,7 +231,8 @@ def update_bar_and_dropdown(zip_code, kwh_usage, therms_usage, gas_allowance):
             title={'text': 'Monthly Emissions (kg CO₂)', 'font': {'size': 16}},
             overlaying='y',
             side='right',
-            gridcolor='lightgray'
+            gridcolor='lightgray',
+            range=[0, max(plans['emissions_g_per_kwh'] * kwh_usage / 1000) * 1.2]  # Dynamic range for emissions
         ),
         legend=dict(
             x=0.5,
@@ -239,13 +240,13 @@ def update_bar_and_dropdown(zip_code, kwh_usage, therms_usage, gas_allowance):
             xanchor="center",
             yanchor="top",
             orientation='h',
-            bgcolor='rgba(255,255,255,0.8)',  # Semi-transparent background
+            bgcolor='rgba(255,255,255,0.8)',
             bordercolor='lightgray',
             borderwidth=1,
             font=dict(size=14)
         ),
         margin=dict(l=80, r=80, t=120, b=80),
-        plot_bgcolor='white',  # Clean white background
+        plot_bgcolor='white',
         font=dict(family='Arial, sans-serif')
     )
 
@@ -370,7 +371,7 @@ def update_pie_chart(selected_plan):
             rotation=0,  # Start at top
             textinfo='percent',  # Show only percentages on the chart
             textposition='inside',
-            pull=pull,  # Pull out renewable sources
+            #pull=pull,  # Pull out renewable sources
             textfont=dict(size=14, color='white'),
             insidetextorientation='radial'
         )
@@ -400,7 +401,7 @@ def update_pie_chart(selected_plan):
         legend=dict(
             orientation='h',  # Horizontal orientation
             x=0.5,
-            y=-0.15,  # Position below the chart
+            y=-0.2,  # Position below the chart
             xanchor='center',
             yanchor='top',
             font=dict(size=12),
