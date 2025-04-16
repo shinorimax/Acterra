@@ -13,30 +13,57 @@ plan_details_df = pd.read_csv('data/plan_details.csv')
 app = dash.Dash(__name__)
 app.title = "Residential Electrification Dashboard"
 
-# Layout
 app.layout = html.Div([
-    html.H1("Compare Electricity Plans by ZIP Code"),
+    html.H1("Residential Electrification Dashboard", style={
+        'textAlign': 'center',
+        'marginBottom': '10px',
+        'fontSize': '24px'
+    }),
 
-    html.Label("Enter ZIP Code:"),
-    dcc.Input(id='zip_input', type='text', debounce=True, placeholder='e.g. 94301'),
-
-    html.Label("Enter Monthly Electricity Usage (kWh):"),
-    dcc.Input(id='kwh_input', type='number', debounce=True, placeholder='e.g. 400', value=400),
-
-    html.Label("Enter Monthly Gas Usage (therms):"),
-    dcc.Input(id='therms_input', type='number', debounce=True, placeholder='e.g. 20', value=20),
-
-    html.Div(id='zip_warning', style={'color': 'red'}),
-
-    dcc.Graph(id='plan_comparison'),
-
-    html.Label("Select a Plan for Power Mix Breakdown:"),
     html.Div([
-        dcc.Dropdown(id='plan_selector', placeholder='Select a plan')
-    ], style={'width': '300px'}),  # You can adjust this width as needed
+        # LEFT: Inputs
+        html.Div([
+            html.Label("ZIP Code:", style={'fontWeight': 'bold', 'fontSize': '14px'}),
+            dcc.Input(id='zip_input', type='text', debounce=True, placeholder='e.g. 94301',
+                      style={'width': '100%', 'marginBottom': '8px'}),
 
-    dcc.Graph(id='power_mix_pie')
-])
+            html.Label("Electricity (kWh):", style={'fontWeight': 'bold', 'fontSize': '14px'}),
+            dcc.Input(id='kwh_input', type='number', debounce=True, placeholder='e.g. 400', value=400,
+                      style={'width': '100%', 'marginBottom': '8px'}),
+
+            html.Label("Gas (therms):", style={'fontWeight': 'bold', 'fontSize': '14px'}),
+            dcc.Input(id='therms_input', type='number', debounce=True, placeholder='e.g. 20', value=20,
+                      style={'width': '100%', 'marginBottom': '8px'}),
+
+            html.Label("Plan for Pie Chart:", style={'fontWeight': 'bold', 'fontSize': '14px'}),
+            dcc.Dropdown(id='plan_selector', placeholder='Select a plan',
+                         style={'width': '100%', 'fontSize': '13px'}),
+
+            html.Div(id='zip_warning', style={'color': 'red', 'marginTop': '5px', 'fontSize': '13px'})
+        ], style={
+            'width': '25%',
+            'padding': '10px'
+        }),
+
+        # RIGHT: Graphs
+        html.Div([
+            dcc.Graph(id='plan_comparison', style={'height': '300px', 'marginBottom': '10px'}),
+            dcc.Graph(id='power_mix_pie', style={'height': '260px'})
+        ], style={'width': '75%', 'padding': '10px'})
+    ], style={
+        'display': 'flex',
+        'flexDirection': 'row',
+        'justifyContent': 'space-between',
+        'alignItems': 'flex-start',
+        'maxWidth': '1200px',
+        'margin': '0 auto'
+    })
+], style={
+    'fontFamily': 'Arial, sans-serif',
+    'height': '100vh',
+    'overflow': 'hidden',
+    'padding': '10px'
+})
 
 # Callback: Update bar chart + plan dropdown
 @app.callback(
