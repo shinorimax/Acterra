@@ -148,6 +148,8 @@ def update_bar_and_dropdown(zip_code, kwh_usage, therms_usage, gas_allowance,
     available_plans = zip_to_plans[zip_code]
     plans = plan_details_df[plan_details_df['plan'].isin(available_plans)]
 
+    gas_emissions_factor = 5.3  # kg CO₂ per therm
+
     if plans.empty:
         return go.Figure(), [], None, f"No detailed plan information available for ZIP code {zip_code}."
     
@@ -243,40 +245,92 @@ def update_bar_and_dropdown(zip_code, kwh_usage, therms_usage, gas_allowance,
             offset=-0.2
         ))
 
-        # --- Add Emissions Bars ---
-        # Separate emissions into original and electrified
-        x_orig = [x for x in x_vals if "(Original)" in x]
-        x_elec = [x for x in x_vals if "(Electrified)" in x]
+        # Separate emissions
+        electric_emissions = []
+        gas_emissions = []
 
-        em_orig = [emissions[i] for i, x in enumerate(x_vals) if "(Original)" in x]
-        em_elec = [emissions[i] for i, x in enumerate(x_vals) if "(Electrified)" in x]
+        x_orig = []
+        x_elec = []
 
-        color_orig = [emission_colors[i] for i, x in enumerate(x_vals) if "(Original)" in x]
-        color_elec = [emission_colors[i] for i, x in enumerate(x_vals) if "(Electrified)" in x]
+        for plan in plans['plan']:
+            emissions_factor = plans.loc[plans['plan'] == plan, 'emissions_g_per_kwh'].values[0]
 
+            # Original emissions
+            elec_em_orig = emissions_factor * kwh_usage / 1000
+            gas_em_orig = gas_emissions_factor * therms_usage
+
+            x_orig.append(plan + " (Original)")
+            electric_emissions.append(elec_em_orig)
+            gas_emissions.append(gas_em_orig)
+
+            # Electrified emissions
+            elec_em_elec = emissions_factor * adjusted_kwh / 1000
+            gas_em_elec = gas_emissions_factor * reduced_gas
+
+            x_elec.append(plan + " (Electrified)")
+            electric_emissions.append(elec_em_elec)
+            gas_emissions.append(gas_em_elec)
+
+        # Electricity Emissions Bar
         fig.add_trace(go.Bar(
-            x=x_orig,
-            y=em_orig,
-            name='Emissions (Original)',
-            marker_color=color_orig,
-            opacity=0.8,
+            x=x_orig + x_elec,
+            y=electric_emissions,
+            name='Electricity Emissions',
+            marker_color='#e74c3c',
             width=0.25,
             offsetgroup='emissions',
             offset=0.15,
-            yaxis='y2'
+            yaxis='y2',
+            opacity=0.85
         ))
 
+        # Gas Emissions Bar
         fig.add_trace(go.Bar(
-            x=x_elec,
-            y=em_elec,
-            name='Emissions (Electrified)',
-            marker_color=color_elec,
-            opacity=0.9,
+            x=x_orig + x_elec,
+            y=gas_emissions,
+            name='Gas Emissions',
+            marker_color='navajowhite',
             width=0.25,
             offsetgroup='emissions',
             offset=0.15,
-            yaxis='y2'
+            yaxis='y2',
+            opacity=0.85
         ))
+
+        # # --- Add Emissions Bars ---
+        # # Separate emissions into original and electrified
+        # x_orig = [x for x in x_vals if "(Original)" in x]
+        # x_elec = [x for x in x_vals if "(Electrified)" in x]
+
+        # em_orig = [emissions[i] for i, x in enumerate(x_vals) if "(Original)" in x]
+        # em_elec = [emissions[i] for i, x in enumerate(x_vals) if "(Electrified)" in x]
+
+        # color_orig = [emission_colors[i] for i, x in enumerate(x_vals) if "(Original)" in x]
+        # color_elec = [emission_colors[i] for i, x in enumerate(x_vals) if "(Electrified)" in x]
+
+        # fig.add_trace(go.Bar(
+        #     x=x_orig,
+        #     y=em_orig,
+        #     name='Emissions (Original)',
+        #     marker_color=color_orig,
+        #     opacity=0.8,
+        #     width=0.25,
+        #     offsetgroup='emissions',
+        #     offset=0.15,
+        #     yaxis='y2'
+        # ))
+
+        # fig.add_trace(go.Bar(
+        #     x=x_elec,
+        #     y=em_elec,
+        #     name='Emissions (Electrified)',
+        #     marker_color=color_elec,
+        #     opacity=0.9,
+        #     width=0.25,
+        #     offsetgroup='emissions',
+        #     offset=0.15,
+        #     yaxis='y2'
+        # ))
 
 
         # --- Layout ---
@@ -299,7 +353,7 @@ def update_bar_and_dropdown(zip_code, kwh_usage, therms_usage, gas_allowance,
                 overlaying='y',
                 side='right',
                 gridcolor='lightgray',
-                range=[0, max(emissions) * 1.2]
+                range=[0, max(electric_emissions + gas_emissions) * 1.2]  # Dynamic range for emissions
             ),
             legend=dict(
                 x=0.5,
@@ -371,18 +425,49 @@ def update_bar_and_dropdown(zip_code, kwh_usage, therms_usage, gas_allowance,
             offset=-0.2  # Align with electricity
         ))
 
-        # Emissions bar (positioned to the right of the stacked bars)
+        # Calculate separate emissions
+        electric_emissions = plans['emissions_g_per_kwh'] * kwh_usage / 1000
+        gas_emissions = gas_emissions_factor * therms_usage
+
+        # Add stacked emissions: Electricity
         fig.add_trace(go.Bar(
             x=plans['plan'],
-            y=plans['emissions_g_per_kwh'] * kwh_usage / 1000,
-            name='Monthly Emissions (kg CO₂)',
+            y=electric_emissions,
+            name='Electricity Emissions',
             marker_color='#e74c3c',
-            width=0.25,  # Narrower to fit beside costs
+            width=0.25,
             offsetgroup='emissions',
-            offset=0.15,  # Shift right to avoid overlap
+            offset=0.15,
             opacity=0.85,
             yaxis='y2'
         ))
+
+        # Add stacked emissions: Gas
+        fig.add_trace(go.Bar(
+            x=plans['plan'],
+            y=[gas_emissions] * len(plans),
+            name='Gas Emissions',
+            marker_color='navajowhite',
+            width=0.25,
+            offsetgroup='emissions',
+            offset=0.15,
+            opacity=0.85,
+            yaxis='y2'
+        ))
+
+
+        # # Emissions bar (positioned to the right of the stacked bars)
+        # fig.add_trace(go.Bar(
+        #     x=plans['plan'],
+        #     y=plans['emissions_g_per_kwh'] * kwh_usage / 1000,
+        #     name='Monthly Emissions (kg CO₂)',
+        #     marker_color='#e74c3c',
+        #     width=0.25,  # Narrower to fit beside costs
+        #     offsetgroup='emissions',
+        #     offset=0.15,  # Shift right to avoid overlap
+        #     opacity=0.85,
+        #     yaxis='y2'
+        # ))
 
         # Update layout with improved readability
         fig.update_layout(
@@ -404,7 +489,7 @@ def update_bar_and_dropdown(zip_code, kwh_usage, therms_usage, gas_allowance,
                 overlaying='y',
                 side='right',
                 gridcolor='lightgray',
-                range=[0, max(plans['emissions_g_per_kwh'] * kwh_usage / 1000) * 1.2]  # Dynamic range for emissions
+                range=[0, max(electric_emissions + gas_emissions) * 1.2]  # Dynamic range for emissions
             ),
             legend=dict(
                 x=0.5,
