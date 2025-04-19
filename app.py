@@ -292,7 +292,7 @@ def update_pie_chart(selected_plan):
 
     # Color scheme: red-orange tones for non-renewables, green-blue for renewables
     colors = [
-        # 🔴 Non-Renewables (darker tones)
+        # Non-Renewables (darker tones)
         "#4d0f00",  # Coal – dark reddish-brown
         "#6b200c",  # Large Hydro (controversial) – dark clay
         "#8b2c02",  # Natural Gas – rich dark orange
@@ -300,7 +300,7 @@ def update_pie_chart(selected_plan):
         "#b15928",  # Non-Renewable Others – earthy brown
         "#666666",  # Unspecified – dark neutral gray
 
-        # 🟢 Renewables (clean, vibrant)
+        # Renewables (clean, vibrant)
         "#006d2c",  # Biomass – forest green
         "#31a354",  # Geothermal – bright leaf green
         "#74c476",  # Hydroelectric – mint green
