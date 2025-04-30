@@ -3,6 +3,8 @@ from dash import dcc, html, Input, Output, State
 import pandas as pd
 import plotly.graph_objects as go
 import json
+# (1) Add this import
+import requests
 
 # Load data
 with open('data/zip_to_plan.json', 'r') as file:
@@ -78,6 +80,11 @@ app.layout = html.Div([
             dcc.Input(id='electrification_pct_input', type='number', value=100, step=1,
                     style={'width': '100%', 'marginBottom': '8px'}),
 
+            # (2) Add new input to layout under the checklist
+            html.Label("Solar System Size (kW):", style={'fontWeight': 'bold'}),
+            dcc.Input(id='solar_size_input', type='number', value=4, step=0.5,
+                    style={'width': '100%', 'marginBottom': '8px'}),
+
             html.Div(id='zip_warning', style={'color': 'red', 'marginTop': '5px', 'fontSize': '13px'})
         ], style={
             'width': '15%',
@@ -132,11 +139,12 @@ app.layout = html.Div([
     Input('heater_eff_input', 'value'),
     Input('furnace_ratio_input', 'value'),
     Input('heater_ratio_input', 'value'),
-    Input('electrification_pct_input', 'value')
+    Input('electrification_pct_input', 'value'),
+    Input('solar_size_input', 'value')
 )
 def update_bar_and_dropdown(zip_code, kwh_usage, therms_usage, gas_allowance,
                              toggle, cop, furnace_eff, heater_eff, furnace_ratio,
-                             heater_ratio, electrification_pct):
+                             heater_ratio, electrification_pct, solar_size):
     if not zip_code:
         return go.Figure(), [], None, ""
 
