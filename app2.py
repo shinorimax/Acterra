@@ -122,59 +122,6 @@ app.layout = html.Div([
         ])
     ], fluid=True, className="py-4")
 
-    # dbc.Container([
-    #     dbc.Row([
-    #         # Left sidebar with common inputs
-    #         dbc.Col([
-    #             html.Div([
-    #                 html.H4("Consumption Profile", className='mb-3'),
-                    
-    #                 # Location input
-    #                 html.Label("Zip Code"),
-    #                 dbc.Input(id="zip_input", type="text", placeholder='e.g. 94301', value=None, className='mb-3'),
-                    
-    #                 # Electricity usage input
-    #                 html.Label("Monthly Electricity Usage"),
-    #                 dbc.InputGroup([
-    #                     dbc.Input(id="kwh_input", type="number", placeholder="kWh", value=500),
-    #                     dbc.InputGroupText("kWh"),
-    #                 ], className='mb-3'),
-                    
-    #                 # Gas usage input
-    #                 html.Label("Monthly Gas Usage"),
-    #                 dbc.InputGroup([
-    #                     dbc.Input(id="therms_input", type="number", placeholder="therms", value=25),
-    #                     dbc.InputGroupText("therms"),
-    #                 ], className='mb-3'),
-                    
-    #                 # Baseline allowance input
-    #                 html.Label("Gas Baseline Allowance"),
-    #                 dbc.InputGroup([
-    #                     dbc.Input(id="gas_allowance_input", type="number", step="01", placeholder="therms/day", value=1.3),
-    #                     dbc.InputGroupText("therms/day"),
-    #                 ], className='mb-3'),
-                    
-    #             ], className='p-3 border rounded')
-    #         ], width=2),
-            
-    #         # Main content area with tabs
-    #         dbc.Col([
-    #             html.Div([
-    #                 # Tabs navigation
-    #                 dbc.Tabs([
-    #                     dbc.Tab(label="Base", tab_id="tab-base"),
-    #                     dbc.Tab(label="Electrification Simulation", tab_id="tab-electrification"),
-    #                     dbc.Tab(label="Solar Simulation", tab_id="tab-solar"),
-    #                 ], id="tabs", active_tab="tab-base"),
-                    
-    #                 # Tab content container
-    #                 html.Div(id="tab-content", className="pt-3")
-    #             ])
-    #         ], width=10)
-    #     ])
-    # ], fluid=True),
-])
-
 # Callback to handle tab selection
 @app.callback(
     dash.Output("tab-content", "children"),
