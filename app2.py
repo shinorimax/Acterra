@@ -56,7 +56,7 @@ app.layout = html.Div([
                     # Baseline allowance input
                     html.Label("Gas Baseline Allowance"),
                     dbc.InputGroup([
-                        dbc.Input(id="gas_allowance_input", type="number", step="0.01", placeholder="therms/day", value=1.06),
+                        dbc.Input(id="gas_allowance_input", type="number", step="01", placeholder="therms/day", value=1.3),
                         dbc.InputGroupText("therms/day"),
                     ], className='mb-3'),
                     
@@ -189,32 +189,6 @@ def render_tab_content(active_tab):
                                         style={'width': '100%', 'height': '28px', 'padding': '2px'})
                             ], width=1, className="px-1"),
                         ], className="mb-3 g-0")
-                        
-                        # dbc.Row([
-                        #     dbc.Col([
-                        #         html.Label("Furnace Ratio (%):", style={'fontWeight': 'bold'}),
-                        #         dcc.Input(id='furnace_ratio_input', type='number', value=60, step=1,
-                        #                 style={'width': '100%'})
-                        #     ], width=3),
-                            
-                        #     dbc.Col([
-                        #         html.Label("Water Heater Ratio (%):", style={'fontWeight': 'bold'}),
-                        #         dcc.Input(id='heater_ratio_input', type='number', value=60, step=1,
-                        #                 style={'width': '100%'})
-                        #     ], width=3),
-                            
-                        #     dbc.Col([
-                        #         html.Label("Electrification %:", style={'fontWeight': 'bold'}),
-                        #         dcc.Input(id='electrification_pct_input', type='number', value=100, step=1,
-                        #                 style={'width': '100%'})
-                        #     ], width=3),
-                            
-                        #     dbc.Col([
-                        #         html.Label("Solar System Size (kW):", style={'fontWeight': 'bold'}),
-                        #         dcc.Input(id='solar_size_input', type='number', value=4, step=0.5,
-                        #                 style={'width': '100%'})
-                        #     ], width=3)
-                        # ])
                     ])),
                     id="electrification-config-collapse",
                     is_open=False,
@@ -483,6 +457,10 @@ def update_bar_electrification(active_tab, zip_code, kwh_usage, therms_usage, ga
     if plans.empty:
         return go.Figure()
     
+    if any(v is None for v in [cop, furnace_eff, heater_eff, furnace_ratio,
+                           heater_ratio, electrification_pct, solar_size]):
+        raise dash.exceptions.PreventUpdate
+    
     # --- Convert to decimals ---
     furnace_ratio /= 100
     heater_ratio /= 100
@@ -495,6 +473,7 @@ def update_bar_electrification(active_tab, zip_code, kwh_usage, therms_usage, ga
         furnace_ratio * furnace_eff * 29.3 / cop +
         heater_ratio * heater_eff * 29.3 / cop
     )
+
     reduced_gas = therms_usage * (1 - electrification_pct)
     adjusted_kwh = kwh_usage + additional_kwh
 
