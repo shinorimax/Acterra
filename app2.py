@@ -120,7 +120,8 @@ app.layout = html.Div([
                 ], className="shadow-sm")
             ], width=10)
         ])
-    ], fluid=True, className="py-4")
+    ], fluid=True, className="py-4"),
+])
 
 # Callback to handle tab selection
 @app.callback(
