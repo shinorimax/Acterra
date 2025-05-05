@@ -25,60 +25,154 @@ app.title = "Energy Rate Plan Optimizer"
 # Create app layout
 app.layout = html.Div([
     # Header
-    html.H1("Energy Rate Plan Comparison Dashboard", className='text-center mb-4'),
+    # html.H1("Energy Rate Plan Comparison Dashboard", className='text-center mb-4'),
+    html.H1(
+        "Electricity Rates Comparison Dashboard",
+        className='text-center',
+        style={
+            'background': 'linear-gradient(90deg, #2C3E50, #4CA1AF)',
+            'color': 'white',
+            'padding': '20px 0',
+            'borderRadius': '8px',
+            'boxShadow': '0 4px 6px rgba(0, 0, 0, 0.1)',
+            'fontFamily': '"Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+            'fontWeight': '600',
+            'letterSpacing': '1px'
+        }
+    ),
     
     # Main content container
+
     dbc.Container([
         dbc.Row([
             # Left sidebar with common inputs
             dbc.Col([
                 html.Div([
-                    html.H4("Consumption Profile", className='mb-3'),
+                    html.H4("Consumption Profile", className='mb-4 text-primary fw-bold'),
                     
                     # Location input
-                    html.Label("Zip Code"),
-                    dbc.Input(id="zip_input", type="text", placeholder='e.g. 94301', value=None, className='mb-3'),
+                    html.Label("Zip Code", className='fw-medium text-secondary mb-2'),
+                    dbc.Input(
+                        id="zip_input", 
+                        type="text", 
+                        placeholder='e.g. 94301', 
+                        value=None, 
+                        className='mb-3 shadow-sm'
+                    ),
                     
                     # Electricity usage input
-                    html.Label("Monthly Electricity Usage"),
+                    html.Label("Monthly Electricity Usage", className='fw-medium text-secondary mb-2'),
                     dbc.InputGroup([
-                        dbc.Input(id="kwh_input", type="number", placeholder="kWh", value=500),
-                        dbc.InputGroupText("kWh"),
+                        dbc.Input(
+                            id="kwh_input", 
+                            type="number", 
+                            placeholder="kWh", 
+                            value=500,
+                            className='shadow-sm'
+                        ),
+                        dbc.InputGroupText("kWh", className='bg-primary text-white'),
                     ], className='mb-3'),
                     
                     # Gas usage input
-                    html.Label("Monthly Gas Usage"),
+                    html.Label("Monthly Gas Usage", className='fw-medium text-secondary mb-2'),
                     dbc.InputGroup([
-                        dbc.Input(id="therms_input", type="number", placeholder="therms", value=25),
-                        dbc.InputGroupText("therms"),
+                        dbc.Input(
+                            id="therms_input", 
+                            type="number", 
+                            placeholder="therms", 
+                            value=25,
+                            className='shadow-sm'
+                        ),
+                        dbc.InputGroupText("therms", className='bg-primary text-white'),
                     ], className='mb-3'),
                     
                     # Baseline allowance input
-                    html.Label("Gas Baseline Allowance"),
+                    html.Label("Gas Baseline Allowance", className='fw-medium text-secondary mb-2'),
                     dbc.InputGroup([
-                        dbc.Input(id="gas_allowance_input", type="number", step="01", placeholder="therms/day", value=1.3),
-                        dbc.InputGroupText("therms/day"),
+                        dbc.Input(
+                            id="gas_allowance_input", 
+                            type="number", 
+                            step="0.1", 
+                            placeholder="therms/day", 
+                            value=1.3,
+                            className='shadow-sm'
+                        ),
+                        dbc.InputGroupText("therms/day", className='bg-primary text-white'),
                     ], className='mb-3'),
                     
-                ], className='p-3 border rounded')
-            ], width=2),
+                    html.Hr(className="my-4"),
+                    
+                ], className='p-4 border rounded bg-light shadow-sm')
+            ], width=2, className="mb-4"),
             
             # Main content area with tabs
             dbc.Col([
                 html.Div([
                     # Tabs navigation
                     dbc.Tabs([
-                        dbc.Tab(label="Base", tab_id="tab-base"),
-                        dbc.Tab(label="Electrification Simulation", tab_id="tab-electrification"),
-                        dbc.Tab(label="Solar Simulation", tab_id="tab-solar"),
-                    ], id="tabs", active_tab="tab-base"),
+                        dbc.Tab(label="Base", tab_id="tab-base", label_style={"font-weight": "bold"}),
+                        dbc.Tab(label="Electrification Simulation", tab_id="tab-electrification", label_style={"font-weight": "bold"}),
+                        dbc.Tab(label="Solar Simulation", tab_id="tab-solar", label_style={"font-weight": "bold"}),
+                    ], id="tabs", active_tab="tab-base", className="nav-fill"),
                     
                     # Tab content container
-                    html.Div(id="tab-content", className="pt-3")
-                ])
+                    html.Div(id="tab-content", className="p-4 border border-top-0 rounded-bottom")
+                ], className="shadow-sm")
             ], width=10)
         ])
-    ], fluid=True),
+    ], fluid=True, className="py-4")
+
+    # dbc.Container([
+    #     dbc.Row([
+    #         # Left sidebar with common inputs
+    #         dbc.Col([
+    #             html.Div([
+    #                 html.H4("Consumption Profile", className='mb-3'),
+                    
+    #                 # Location input
+    #                 html.Label("Zip Code"),
+    #                 dbc.Input(id="zip_input", type="text", placeholder='e.g. 94301', value=None, className='mb-3'),
+                    
+    #                 # Electricity usage input
+    #                 html.Label("Monthly Electricity Usage"),
+    #                 dbc.InputGroup([
+    #                     dbc.Input(id="kwh_input", type="number", placeholder="kWh", value=500),
+    #                     dbc.InputGroupText("kWh"),
+    #                 ], className='mb-3'),
+                    
+    #                 # Gas usage input
+    #                 html.Label("Monthly Gas Usage"),
+    #                 dbc.InputGroup([
+    #                     dbc.Input(id="therms_input", type="number", placeholder="therms", value=25),
+    #                     dbc.InputGroupText("therms"),
+    #                 ], className='mb-3'),
+                    
+    #                 # Baseline allowance input
+    #                 html.Label("Gas Baseline Allowance"),
+    #                 dbc.InputGroup([
+    #                     dbc.Input(id="gas_allowance_input", type="number", step="01", placeholder="therms/day", value=1.3),
+    #                     dbc.InputGroupText("therms/day"),
+    #                 ], className='mb-3'),
+                    
+    #             ], className='p-3 border rounded')
+    #         ], width=2),
+            
+    #         # Main content area with tabs
+    #         dbc.Col([
+    #             html.Div([
+    #                 # Tabs navigation
+    #                 dbc.Tabs([
+    #                     dbc.Tab(label="Base", tab_id="tab-base"),
+    #                     dbc.Tab(label="Electrification Simulation", tab_id="tab-electrification"),
+    #                     dbc.Tab(label="Solar Simulation", tab_id="tab-solar"),
+    #                 ], id="tabs", active_tab="tab-base"),
+                    
+    #                 # Tab content container
+    #                 html.Div(id="tab-content", className="pt-3")
+    #             ])
+    #         ], width=10)
+    #     ])
+    # ], fluid=True),
 ])
 
 # Callback to handle tab selection
@@ -308,12 +402,17 @@ def update_bar(zip_code, kwh_usage, therms_usage, gas_allowance, active_tab):
         # Match gas cost to length of plans (assume same for all)
         gas_costs = [gas_total] * len(plans)
 
+        elec_color_elec = '#1f77b4'      # Bold blue
+        gas_color_elec = '#ff7f0e'       # Bold orange
+        emission_color_elec = '#d62728'  # Strong red
+        emission_color_gas = '#f2c6a0'   # Soft tan
+
         # First: Electricity (bottom layer of stack)
         fig.add_trace(go.Bar(
             x=plans['plan'],
             y=electricity_costs,
             name='Electricity Cost',
-            marker_color='#3498db',
+            marker_color=elec_color_elec,
             width=0.35,  # Slightly narrower to accommodate emissions bar
             offsetgroup='costs',
             offset=-0.2  # Shift left to make room for emissions
@@ -324,7 +423,7 @@ def update_bar(zip_code, kwh_usage, therms_usage, gas_allowance, active_tab):
             x=plans['plan'],
             y=gas_costs,
             name='Gas Cost',
-            marker_color='#e67e22',
+            marker_color=gas_color_elec,
             width=0.35,
             offsetgroup='costs',
             offset=-0.2  # Align with electricity
@@ -339,7 +438,7 @@ def update_bar(zip_code, kwh_usage, therms_usage, gas_allowance, active_tab):
             x=plans['plan'],
             y=electric_emissions,
             name='Electricity Emissions',
-            marker_color='#e74c3c',
+            marker_color=emission_color_elec,
             width=0.25,
             offsetgroup='emissions',
             offset=0.15,
@@ -352,7 +451,7 @@ def update_bar(zip_code, kwh_usage, therms_usage, gas_allowance, active_tab):
             x=plans['plan'],
             y=[gas_emissions] * len(plans),
             name='Gas Emissions',
-            marker_color='navajowhite',
+            marker_color=emission_color_gas,
             width=0.25,
             offsetgroup='emissions',
             offset=0.15,
@@ -442,12 +541,12 @@ def update_bar_electrification(active_tab, zip_code, kwh_usage, therms_usage, ga
         raise dash.exceptions.PreventUpdate
 
     if not zip_code:
-        return go.Figure(), [], None, ""
+        return go.Figure()
 
     zip_code = zip_code.strip()
 
     if zip_code not in zip_to_plans:
-        return go.Figure(), [], None, f"No plans found for ZIP code {zip_code}."
+        return go.Figure()
 
     available_plans = zip_to_plans[zip_code]
     plans = plan_details_df[plan_details_df['plan'].isin(available_plans)]
@@ -487,16 +586,28 @@ def update_bar_electrification(active_tab, zip_code, kwh_usage, therms_usage, ga
 
     elec_costs = []
     gas_costs = []
-    emissions = []
 
     elec_colors = []
     gas_colors = []
+    elec_opacities = []
+    gas_opacities = []
+
+    electric_emissions = []
+    gas_emissions = []
     emission_colors = []
     emission_opacities = []
 
-    for plan in plans['plan']:
+    for i, plan in enumerate(plans['plan']):
         price_per_kwh = plans.loc[plans['plan'] == plan, 'price_per_kwh'].values[0]
         emissions_factor = plans.loc[plans['plan'] == plan, 'emissions_g_per_kwh'].values[0]
+
+        # Colors
+        elec_color_original = 'lightsteelblue'
+        gas_color_original = '#fdd9a0'
+        elec_color_elec = '#1f77b4'      # Bold blue
+        gas_color_elec = '#ff7f0e'       # Bold orange
+        emission_color_elec = '#d62728'  # Strong red
+        emission_color_gas = '#f2c6a0'   # Soft tan
 
         # --- Original ---
         gas_base_orig = gas_base_price * min(therms_usage, gas_allowance * 30)
@@ -504,15 +615,19 @@ def update_bar_electrification(active_tab, zip_code, kwh_usage, therms_usage, ga
         gas_total_orig = gas_base_orig + gas_excess_orig
         elec_cost_orig = price_per_kwh * kwh_usage
         emissions_kg_orig = emissions_factor * kwh_usage / 1000
+        gas_em_orig = gas_emissions_factor * therms_usage
 
         x_vals.append(plan + " (Original)")
         elec_costs.append(elec_cost_orig)
         gas_costs.append(gas_total_orig)
-        emissions.append(emissions_kg_orig)
-        elec_colors.append('lightblue')
-        gas_colors.append('moccasin')
-        emission_colors.append('lightcoral')
-        emission_opacities.append(0.8)
+        elec_colors.append(elec_color_original)
+        gas_colors.append(gas_color_original)
+        elec_opacities.append(0.5)
+        gas_opacities.append(0.5)
+        electric_emissions.append(emissions_kg_orig)
+        gas_emissions.append(gas_em_orig)
+        emission_colors.append(emission_color_elec)
+        emission_opacities.append(0.5)
 
         # --- Electrified ---
         gas_base_elec = gas_base_price * min(reduced_gas, gas_allowance * 30)
@@ -520,95 +635,82 @@ def update_bar_electrification(active_tab, zip_code, kwh_usage, therms_usage, ga
         gas_total_elec = gas_base_elec + gas_excess_elec
         elec_cost_elec = price_per_kwh * adjusted_kwh
         emissions_kg_elec = emissions_factor * adjusted_kwh / 1000
+        gas_em_elec = gas_emissions_factor * reduced_gas
 
         x_vals.append(plan + " (Electrified)")
         elec_costs.append(elec_cost_elec)
         gas_costs.append(gas_total_elec)
-        emissions.append(emissions_kg_elec)
-        elec_colors.append('#3498db')
-        gas_colors.append('#e67e22')
-        emission_colors.append('#e74c3c')
-        emission_opacities.append(0.9)
+        elec_colors.append(elec_color_elec)
+        gas_colors.append(gas_color_elec)
+        elec_opacities.append(1.0)
+        gas_opacities.append(1.0)
+        electric_emissions.append(emissions_kg_elec)
+        gas_emissions.append(gas_em_elec)
+        emission_colors.append(emission_color_elec)
+        emission_opacities.append(1.0)
 
-    # --- Add Electricity Bars ---
+
+    # Electricity Cost Bars
     fig.add_trace(go.Bar(
         x=x_vals,
         y=elec_costs,
         name='Electricity Cost',
-        marker_color=elec_colors,
+        marker=dict(color=elec_colors),
+        opacity=None,  # use per-bar opacity
         width=0.35,
         offsetgroup='costs',
-        offset=-0.2
+        offset=-0.2,
+        customdata=elec_opacities,
+        marker_opacity=elec_opacities
     ))
 
-    # --- Add Gas Bars ---
+    # Gas Cost Bars
     fig.add_trace(go.Bar(
         x=x_vals,
         y=gas_costs,
         name='Gas Cost',
-        marker_color=gas_colors,
+        marker=dict(color=gas_colors),
+        opacity=None,
         width=0.35,
         offsetgroup='costs',
-        offset=-0.2
+        offset=-0.2,
+        customdata=gas_opacities,
+        marker_opacity=gas_opacities
     ))
-
-    # Separate emissions
-    electric_emissions = []
-    gas_emissions = []
-
-    x_orig = []
-    x_elec = []
-
-    for plan in plans['plan']:
-        emissions_factor = plans.loc[plans['plan'] == plan, 'emissions_g_per_kwh'].values[0]
-
-        # Original emissions
-        elec_em_orig = emissions_factor * kwh_usage / 1000
-        gas_em_orig = gas_emissions_factor * therms_usage
-
-        x_orig.append(plan + " (Original)")
-        electric_emissions.append(elec_em_orig)
-        gas_emissions.append(gas_em_orig)
-
-        # Electrified emissions
-        elec_em_elec = emissions_factor * adjusted_kwh / 1000
-        gas_em_elec = gas_emissions_factor * reduced_gas
-
-        x_elec.append(plan + " (Electrified)")
-        electric_emissions.append(elec_em_elec)
-        gas_emissions.append(gas_em_elec)
 
     # Electricity Emissions Bar
     fig.add_trace(go.Bar(
-        x=x_orig + x_elec,
+        x=x_vals,
         y=electric_emissions,
         name='Electricity Emissions',
-        marker_color='#e74c3c',
+        marker=dict(color=emission_color_elec),
+        opacity=None,
+        marker_opacity=emission_opacities,
         width=0.25,
         offsetgroup='emissions',
         offset=0.15,
-        yaxis='y2',
-        opacity=0.85
+        yaxis='y2'
     ))
 
     # Gas Emissions Bar
     fig.add_trace(go.Bar(
-        x=x_orig + x_elec,
+        x=x_vals,
         y=gas_emissions,
         name='Gas Emissions',
-        marker_color='navajowhite',
+        marker=dict(color=emission_color_gas),
+        opacity=None,
+        marker_opacity=emission_opacities,
         width=0.25,
         offsetgroup='emissions',
         offset=0.15,
-        yaxis='y2',
-        opacity=0.85
+        yaxis='y2'
     ))
 
-    # --- Layout ---
+    # # --- Layout ---
     fig.update_layout(
         title={
-            'text': f"Energy Rate Plans for ZIP {zip_code} (Electrification Simulation Enabled)",
-            'font': {'size': 22, 'family': 'Arial, sans-serif'}
+            'text': f"Electrification Simulation for ZIP {zip_code}",
+            'font': {'size': 18, 'family': 'Arial, sans-serif'}
         },
         barmode='stack',
         bargap=0.4,
@@ -768,7 +870,7 @@ def update_pie_chart(selected_plan):
 
     pie_fig.update_layout(
         title={
-            'text': f"Power Mix for {selected_plan}<br><span style='font-size:14px;color:#2ca25f'>{renewable_pct}% Renewable</span> | <span style='font-size:14px;color:#d73027'>{non_renewable_pct}% Non-Renewable</span>",
+            'text': f"Power Mix for {selected_plan}<br><span style='font-size:18px;color:#2ca25f'>{renewable_pct}% Renewable</span> | <span style='font-size:14px;color:#d73027'>{non_renewable_pct}% Non-Renewable</span>",
             'x': 0.5,
             'xanchor': 'center',
             'font': dict(size=18),
