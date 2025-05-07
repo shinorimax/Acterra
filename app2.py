@@ -116,7 +116,6 @@ app.layout = html.Div([
                         dbc.Tab(label="Electrification Simulation", tab_id="tab-electrification", label_style={"font-weight": "bold"}),
                         dbc.Tab(label="Solar Simulation", tab_id="tab-solar", label_style={"font-weight": "bold"}),
                     ], id="tabs", active_tab="tab-base", className="nav-fill"),
-                    
                     # Tab content container
                     html.Div(id="tab-content", className="p-4 border border-top-0 rounded-bottom")
                 ], className="shadow-sm")
@@ -144,7 +143,7 @@ def render_tab_content(active_tab):
                 html.Div([
                     dcc.Graph(id='plan_comparison', style={'height': '500px'})
                 ], style={
-                    'width': '60%',
+                    'width': '45%',
                     'padding': '3px',
                     'boxSizing': 'border-box'
                 }),
@@ -159,7 +158,7 @@ def render_tab_content(active_tab):
                     dcc.Dropdown(id='plan_selector', placeholder='Select a plan',
                                 style={'width': '100%', 'fontSize': '13px'})
                 ], style={
-                    'width': '35%',
+                    'width': '45%',
                     'padding': '3px',
                     'boxSizing': 'border-box'
                 }),
@@ -917,10 +916,10 @@ def update_pie_chart(selected_plan):
 
     pie_fig.update_layout(
         title={
-            'text': f"Power Mix for {selected_plan}<br><span style='font-size:18px;color:#2ca25f'>{renewable_pct}% Renewable</span> | <span style='font-size:14px;color:#d73027'>{non_renewable_pct}% Non-Renewable</span>",
+            'text': f"Power Mix for {selected_plan}<br><span style='font-size:18px;color:#2ca25f'>{renewable_pct}% Renewable</span> | <span style='font-size:18px;color:#d73027'>{non_renewable_pct}% Non-Renewable</span>",
             'x': 0.5,
             'xanchor': 'center',
-            'font': dict(size=18),
+            'font': dict(size=22),
             'y': 0.95
         },
         margin=dict(l=20, r=20, t=20, b=20),  # Increased bottom margin for legend
