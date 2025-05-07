@@ -6,6 +6,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import json
 import requests
+import calendar
 
 # Load data
 with open('data/zip_to_plan.json', 'r') as file:
@@ -56,7 +57,7 @@ app.layout = html.Div([
                         id="zip_input", 
                         type="text", 
                         placeholder='e.g. 94301', 
-                        value=None, 
+                        value="94305", 
                         className='mb-3 shadow-sm'
                     ),
                     
@@ -67,7 +68,7 @@ app.layout = html.Div([
                             id="kwh_input", 
                             type="number", 
                             placeholder="kWh", 
-                            value=500,
+                            value=400,
                             className='shadow-sm'
                         ),
                         dbc.InputGroupText("kWh", className='bg-primary text-white'),
@@ -120,7 +121,8 @@ app.layout = html.Div([
                 ], className="shadow-sm")
             ], width=10)
         ])
-    ], fluid=True, className="py-4")
+    ], fluid=True, className="py-4"),
+])
 
 # Callback to handle tab selection
 @app.callback(
@@ -202,19 +204,20 @@ def render_tab_content(active_tab):
                                         style={'width': '100%', 'height': '28px', 'padding': '2px'})
                             ], width=2, className="px-1"),
 
-                            # Fourth input
+                            # Slider to control Furnace vs Water Heater ratio
                             dbc.Col([
-                                html.Label("Furnace Ratio (%):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
-                                dcc.Input(id='furnace_ratio_input', type='number', value=60, step=1,
-                                        style={'width': '100%', 'height': '28px', 'padding': '2px'})
-                            ], width=2, className="px-1"),
-                            
-                            # Fifth input
-                            dbc.Col([
-                                html.Label("Water Heater Ratio (%):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
-                                dcc.Input(id='heater_ratio_input', type='number', value=60, step=1,
-                                        style={'width': '100%', 'height': '28px', 'padding': '2px'})
-                            ], width=2, className="px-1"),
+                                html.Label("Furnace vs Water Heater Gas Ratio (%)", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
+                                dcc.Slider(
+                                    id='furnace_ratio_slider',
+                                    min=0,
+                                    max=100,
+                                    step=1,
+                                    value=60,
+                                    marks={0: '0% Furnace', 50: '50 %', 100: '100% Furnace'},
+                                    tooltip={"placement": "bottom", "always_visible": True}
+                                ),
+                                html.Div(id='furnace_water_ratio_display', style={'fontSize': '10px', 'marginTop': '5px'})
+                            ], width=4, className="px-1"),
                             
                             # Sixth input
                             dbc.Col([
@@ -223,12 +226,12 @@ def render_tab_content(active_tab):
                                         style={'width': '100%', 'height': '28px', 'padding': '2px'})
                             ], width=2, className="px-1"),
                             
-                            # Seventh input
-                            dbc.Col([
-                                html.Label("Solar (kW):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
-                                dcc.Input(id='solar_size_input', type='number', value=4, step=0.5,
-                                        style={'width': '100%', 'height': '28px', 'padding': '2px'})
-                            ], width=1, className="px-1"),
+                            # # Seventh input
+                            # dbc.Col([
+                            #     html.Label("Solar (kW):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
+                            #     dcc.Input(id='solar_size_input', type='number', value=4, step=0.5,
+                            #             style={'width': '100%', 'height': '28px', 'padding': '2px'})
+                            # ], width=1, className="px-1"),
                         ], className="mb-3 g-0")
                     ])),
                     id="electrification-config-collapse",
@@ -267,8 +270,105 @@ def render_tab_content(active_tab):
     elif active_tab == "tab-solar":
         return html.Div([
             html.H3("Solar Simulation Tab"),
-            html.P("Content for the solar simulation tab will go here."),
-            html.Div(id="solar-simulation-content", className="mt-4")
+            # Collapsible advanced settings
+            html.Div([
+                dbc.Button(
+                    "Advanced Configuration",
+                    id="solar-config-button",
+                    color="secondary",
+                    className="mb-3",
+                    outline=True,
+                ),
+                dbc.Collapse(
+                    dbc.Card(dbc.CardBody([
+                        dbc.Row([
+                            # Solar Coverage
+                            dbc.Col([
+                                html.Label("Solar Coverage (%):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
+                                dcc.Input(id='solar_coverage_input', type='number', value=90, step=1,
+                                        style={'width': '100%', 'height': '28px', 'padding': '2px'}),
+                                dbc.Tooltip("Target % of your electricity usage covered by solar", target="solar_coverage_input")
+                            ], width=2, className="px-1"),
+
+                            # Roof Space (sq ft)
+                            dbc.Col([
+                                html.Label("Available Roof Space (sq ft):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
+                                dcc.Input(id='roof_sqft_input', type='number', value=400, step=10,
+                                        style={'width': '100%', 'height': '28px', 'padding': '2px'})
+                            ], width=2, className="px-1"),
+
+                            # Tilt (degrees)
+                            dbc.Col([
+                                html.Label("Tilt (°):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
+                                dcc.Input(id='tilt_input', type='number', value=20, step=1,
+                                        style={'width': '100%', 'height': '28px', 'padding': '2px'}),
+                                dbc.Tooltip("Tilt angle of your panels in degrees", target="tilt_input")
+                            ], width=1, className="px-1"),
+
+                            # Azimuth (degrees)
+                            dbc.Col([
+                                html.Label("Azimuth (°):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
+                                dcc.Input(id='azimuth_input', type='number', value=180, step=1,
+                                        style={'width': '100%', 'height': '28px', 'padding': '2px'}),
+                                dbc.Tooltip("Direction your panels face (180 = South)", target="azimuth_input")
+                            ], width=1, className="px-1"),
+
+                            # Array Type
+                            dbc.Col([
+                                html.Label("Array Type:", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
+                                dcc.Dropdown(
+                                    id='array_type_input',
+                                    options=[
+                                        {'label': 'Fixed Roof Mount', 'value': 1},
+                                        {'label': 'Fixed Open Rack', 'value': 0},
+                                        {'label': '1-Axis Tracking', 'value': 2},
+                                        {'label': '1-Axis Backtracking', 'value': 3},
+                                        {'label': '2-Axis Tracking', 'value': 4}
+                                    ],
+                                    value=1,
+                                    clearable=False,
+                                    style={'fontSize': '12px'}
+                                ),
+                                dbc.Tooltip("Mounting style (e.g. roof or tracking system)", target="array_type_input")
+                            ], width=2, className="px-1"),
+
+                            # Module Type
+                            dbc.Col([
+                                html.Label("Module Type:", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
+                                dcc.Dropdown(
+                                    id='module_type_input',
+                                    options=[
+                                        {'label': 'Standard', 'value': 0},
+                                        {'label': 'Premium', 'value': 1},
+                                        {'label': 'Thin Film', 'value': 2}
+                                    ],
+                                    value=1,
+                                    clearable=False,
+                                    style={'fontSize': '12px'}
+                                )
+                            ], width=2, className="px-1"),
+
+                            # System Losses (%)
+                            dbc.Col([
+                                html.Label("System Losses (%):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
+                                dcc.Input(id='losses_input', type='number', value=14, step=1,
+                                        style={'width': '100%', 'height': '28px', 'padding': '2px'}),
+                                dbc.Tooltip("System losses from shading, wiring, etc. (as %)", target="losses_input")
+                            ], width=2, className="px-1"),
+
+                        ], className="mb-3 g-0")
+                    ])),
+                    id="solar-config-collapse",
+                    is_open=False,
+                ),
+
+            ], className="mb-4"),
+            html.Div(id="solar-simulation-content", className="mt-4"),
+            html.H5("Savings over the next 20 years (assuming 2% annual increase in electricity rates)"),
+            dcc.Dropdown(id='plan_selector_solar', placeholder='Select a plan',
+                                style={'width': '50%', 'fontSize': '13px'}),
+            html.Div(id="solar-simulation-content-2", className="mt-4"),
+            # dcc.Graph(id="fig_savings_projection", style={'width': '100%', 'height': '400px'}),
         ])
     
     # Default case
@@ -476,14 +576,14 @@ def update_bar(zip_code, kwh_usage, therms_usage, gas_allowance, active_tab):
     Input('cop_input', 'value'),
     Input('furnace_eff_input', 'value'),
     Input('heater_eff_input', 'value'),
-    Input('furnace_ratio_input', 'value'),
-    Input('heater_ratio_input', 'value'),
+    Input('furnace_ratio_slider', 'value'),
+    # Input('furnace_ratio_input', 'value'),
+    # Input('heater_ratio_input', 'value'),
     Input('electrification_pct_input', 'value'),
-    Input('solar_size_input', 'value')
+    # Input('solar_size_input', 'value')
 )
 def update_bar_electrification(active_tab, zip_code, kwh_usage, therms_usage, gas_allowance,
-                             cop, furnace_eff, heater_eff, furnace_ratio,
-                             heater_ratio, electrification_pct, solar_size):
+                             cop, furnace_eff, heater_eff, furnace_ratio, electrification_pct):
     if active_tab != "tab-electrification":
         raise dash.exceptions.PreventUpdate
 
@@ -503,13 +603,12 @@ def update_bar_electrification(active_tab, zip_code, kwh_usage, therms_usage, ga
     if plans.empty:
         return go.Figure()
     
-    if any(v is None for v in [cop, furnace_eff, heater_eff, furnace_ratio,
-                           heater_ratio, electrification_pct, solar_size]):
+    if any(v is None for v in [cop, furnace_eff, heater_eff, furnace_ratio, electrification_pct]):
         raise dash.exceptions.PreventUpdate
     
     # --- Convert to decimals ---
     furnace_ratio /= 100
-    heater_ratio /= 100
+    heater_ratio = 1 - furnace_ratio
     electrification_pct /= 100
     furnace_eff /= 100
     heater_eff /= 100
@@ -843,6 +942,279 @@ def update_pie_chart(selected_plan):
 
     return pie_fig
 
+##########################
+## Solar Simulation Tab ##
+##########################
 
+from geopy.geocoders import Nominatim
+
+def zip_to_latlon(zip_code):
+    geolocator = Nominatim(user_agent="solar_app")
+    try:
+        location = geolocator.geocode({"postalcode": zip_code}, timeout=5)
+        if location:
+            return location.latitude, location.longitude
+        else:
+            return None, None
+    except Exception as e:
+        print(f"Geocoding error: {e}")
+        return None, None
+
+
+def fetch_solar_potential(lat, lon, system_capacity_kw=4.0, azimuth=180, tilt=20,
+                          array_type=1, module_type=1, losses=14):
+    """Fetches estimated solar output from NREL PVWatts API with custom params."""
+    url = "https://developer.nrel.gov/api/pvwatts/v6.json"
+    params = {
+        "api_key": "897BGzhguuFnqgrEN2wTzPijQrA2n9xUpwytM6H8",  # Use your own API key
+        "lat": lat,
+        "lon": lon,
+        "system_capacity": system_capacity_kw,
+        "azimuth": azimuth,
+        "tilt": tilt,
+        "array_type": array_type,
+        "module_type": module_type,
+        "losses": losses,
+        "dataset": "nsrdb",
+        "timeframe": "monthly"
+    }
+
+    response = requests.get(url, params=params)
+    print("Request URL:", response.url)
+    print("Status Code:", response.status_code)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Error: {response.status_code}")
+        return None
+    
+@app.callback(
+    [Output('plan_selector_solar', 'options'),
+     Output('plan_selector_solar', 'value')],
+    Input('zip_input', 'value')
+)
+def update_dropdown(zip_code):
+    if not zip_code:
+        return [], None
+
+    zip_code = zip_code.strip()
+
+    if zip_code not in zip_to_plans:
+        return [], None
+
+    available_plans = zip_to_plans[zip_code]
+    plans = plan_details_df[plan_details_df['plan'].isin(available_plans)]
+
+    options = [{'label': plan, 'value': plan} for plan in plans['plan']]
+    default_value = plans['plan'].iloc[0]
+
+    return options, default_value
+    
+# Add a callback for the collapsible advanced settings section
+@app.callback(
+    dash.Output("solar-config-collapse", "is_open"),
+    [dash.Input("solar-config-button", "n_clicks")],
+    [dash.State("solar-config-collapse", "is_open")],
+)
+def toggle_electrification_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("solar-simulation-content", "children"),
+    Output("solar-simulation-content-2", "children"),
+    Input("tabs", "active_tab"),
+    Input("zip_input", "value"),
+    Input("kwh_input", "value"),
+    Input("solar_coverage_input", "value"),
+    Input("roof_sqft_input", "value"),
+    Input("tilt_input", "value"),
+    Input("azimuth_input", "value"),
+    Input("array_type_input", "value"),
+    Input("module_type_input", "value"),
+    Input("losses_input", "value"), 
+    Input("plan_selector_solar", "value")
+)
+def update_solar_tab(active_tab, zip_code, monthly_kwh_usage, solar_coverage_ratio_pct,
+                     roof_sqft, tilt, azimuth, array_type, module_type, losses, selected_plan):
+    if active_tab != "tab-solar" or not zip_code:
+        raise dash.exceptions.PreventUpdate
+    
+    zip_code = str(zip_code).strip()
+    lat, lon = zip_to_latlon(zip_code)
+    if lat is None:
+        return html.P("Could not geocode ZIP code."), go.Figure()
+
+    # Estimate system size (1 kW ~ 100 sqft)
+    system_capacity_kw = roof_sqft / 100.0 if roof_sqft else 4.0
+
+    # Fetch solar output estimate
+    data = fetch_solar_potential(lat, lon, system_capacity_kw, azimuth, tilt, array_type, module_type, losses)
+    if not data or "outputs" not in data:
+        return html.P("Failed to retrieve solar data."), go.Figure()
+
+    monthly_kwh = data["outputs"]["ac_monthly"]
+    annual_kwh = data["outputs"]["ac_annual"]
+
+    # Convert % to ratio
+    coverage_ratio = (solar_coverage_ratio_pct or 70) / 100.0
+
+    # Compute achievable average monthly output
+    avg_monthly_output = sum(monthly_kwh) / 12
+
+    # Requested offset in kWh
+    requested_offset = (monthly_kwh_usage or 0) * coverage_ratio
+
+    # Final offset is the lesser of the two
+    monthly_solar_offset = min(requested_offset, avg_monthly_output)
+
+    # Generate warning message if user request exceeds capacity
+    warning_msg = None
+    if requested_offset > avg_monthly_output:
+        actual_coverage = (avg_monthly_output / (monthly_kwh_usage or 1)) * 100
+        warning_msg = html.Div([
+            html.P(f"⚠️ Your roof space can only support about {int(actual_coverage)}% of your monthly usage.",
+                style={'color': 'orange', 'fontWeight': 'bold'})
+        ])
+    else:
+        actual_coverage = coverage_ratio * 100
+
+
+    # --- Get available plans at ZIP ---
+    if zip_code not in zip_to_plans:
+        return html.P("No electricity plans available for this ZIP code."), go.Figure()
+
+    available_plans = zip_to_plans[zip_code]
+    plans = plan_details_df[plan_details_df['plan'].isin(available_plans)]
+
+    # --- Cost & Emissions Savings per Plan ---
+    cost_savings = []
+    emissions_savings = []
+    plan_labels = []
+
+    for _, row in plans.iterrows():
+        price_per_kwh = row['price_per_kwh']
+        emissions_factor = row['emissions_g_per_kwh']  # g CO₂ per kWh
+
+        monthly_cost_saving = monthly_solar_offset * price_per_kwh
+        monthly_emissions_saving = (monthly_solar_offset * emissions_factor) / 1000  # kg CO₂
+
+        plan_labels.append(row['plan'])
+        cost_savings.append(monthly_cost_saving)
+        emissions_savings.append(monthly_emissions_saving)
+
+    # --- Graph for cost & emissions savings ---
+    savings_fig = go.Figure()
+    savings_fig.add_trace(go.Bar(x=plan_labels, y=cost_savings, name="Monthly Cost Savings ($)", marker_color="#3498db", yaxis="y", offsetgroup=0))
+    savings_fig.add_trace(go.Bar(x=plan_labels, y=emissions_savings, name="Monthly Emissions Savings (kg CO₂)", marker_color="#e74c3c", yaxis="y2", offsetgroup=1))
+    savings_fig.update_layout(
+        title="Estimated Monthly Solar Savings by Plan",
+        barmode="group",
+        yaxis=dict(title="Cost Savings ($)", side="left"),
+        yaxis2=dict(title="Emissions Savings (kg CO₂)", overlaying="y", side="right"),
+        legend=dict(x=0.5, y=-0.3, xanchor="center", orientation="h"),
+        margin=dict(t=50, b=100),
+        plot_bgcolor="white"
+    )
+
+    # --- Graph for monthly solar output ---
+    bar_fig = go.Figure(data=[
+        go.Bar(x=list(calendar.month_abbr[1:]), y=monthly_kwh, marker_color="#7cc4b0")
+    ])
+    bar_fig.update_layout(
+        title=f"Estimated Monthly Solar Output for ZIP {zip_code}",
+        yaxis_title="kWh",
+        plot_bgcolor="white"
+    )
+
+    ######## 20 year projection ########
+    row = plan_details_df[plan_details_df['plan'] == selected_plan]
+
+    years = list(range(1, 21))
+    up_front_cost = 10626
+    accum_cost_with = []
+    accum_cost_without = []
+    price_per_kwh = row['price_per_kwh'].values[0]
+
+    for i in years:
+        annual_cost_with = monthly_kwh_usage * price_per_kwh * 12 * (1 - (actual_coverage / 100) * (0.995 ** i)) * ((1.022 / 1.04) ** i)
+        annual_cost_without = monthly_kwh_usage * price_per_kwh * 12 * ((1.022 / 1.04) ** i)
+
+        if i == 1:
+            accum_cost_with.append(annual_cost_with + up_front_cost)
+            accum_cost_without.append(annual_cost_without)
+        else:
+            accum_cost_with.append(accum_cost_with[-1] + annual_cost_with)
+            accum_cost_without.append(accum_cost_without[-1] + annual_cost_without)
+        print(accum_cost_with)
+        print(accum_cost_without)
+
+    # Total savings over 20 years
+    total_cost_with = accum_cost_with[-1]
+    total_cost_without = accum_cost_without[-1]
+    total_savings = total_cost_without - total_cost_with
+
+    # Estimate payback year
+    payback_year = None
+    for y in range(20):
+        if accum_cost_with[y] < accum_cost_without[y]:
+            payback_year = y + 1  # Year number (1-indexed)
+            break
+
+
+    # Create figure
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=years, y=accum_cost_without, mode='lines+markers', name='Without Solar', line=dict(color="#e74c3c")))
+    fig.add_trace(go.Scatter(x=years, y=accum_cost_with, mode='lines+markers', name='With Solar', line=dict(color="#3498db")))
+
+    fig.update_layout(
+        title=f"20-Year Accumulated Cost – {selected_plan}",
+        xaxis_title="Year",
+        yaxis_title="Cumulative Cost ($)",
+        plot_bgcolor="white",
+        margin=dict(t=50, b=100),
+        legend=dict(x=0.5, y=-0.2, xanchor="center", orientation="h"),
+        yaxis=dict(
+            showgrid=True,
+            gridcolor='lightgray',
+            gridwidth=0.5,
+            zeroline=False
+        ),
+        xaxis=dict(
+            showgrid=False  # optional: keep x-axis clean
+        )
+    )
+
+
+    return html.Div([
+        warning_msg if warning_msg else None,
+        
+        dbc.Row([
+            # Left: Cost & Emissions Savings Chart with heading
+            dbc.Col(html.Div([
+                html.H5(f"Estimated Monthly Solar Savings (Assuming {int(coverage_ratio * 100)}% Offset)"),
+                dcc.Graph(figure=savings_fig)
+            ]), width=6),
+
+            # Right: Monthly Output Chart with heading
+            dbc.Col(html.Div([
+                html.H5(f"Estimated Annual Output: {int(annual_kwh)} kWh"),
+                dcc.Graph(figure=bar_fig)
+            ]), width=6),
+        ], className="mb-4"),
+        html.Hr(),
+    ]), html.Div([
+        html.Div([
+            html.H5("Summary of Solar Impact", className="mt-4"),
+            html.Ul([
+                html.Li(f"Estimated Payback Year: {payback_year if payback_year else 'Beyond 20 years'}"),
+                html.Li(f"Total 20-Year Savings: ${int(total_savings):,}")
+            ], style={"fontSize": "14px"})
+        ]),
+        dcc.Graph(figure=fig, style={'width': '100%', 'height': '400px'}),
+    ])
+
+                   
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run(debug=True)
