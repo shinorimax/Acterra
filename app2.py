@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 import json
 import requests
 import calendar
+import os
 
 # Load data
 with open('data/zip_to_plan.json', 'r') as file:
@@ -1217,4 +1218,5 @@ def update_solar_tab(active_tab, zip_code, monthly_kwh_usage, solar_coverage_rat
 
                    
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8050)), debug=False)
