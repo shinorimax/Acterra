@@ -226,12 +226,12 @@ def render_tab_content(active_tab):
                                         style={'width': '100%', 'height': '28px', 'padding': '2px'})
                             ], width=2, className="px-1"),
                             
-                            # Seventh input
-                            dbc.Col([
-                                html.Label("Solar (kW):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
-                                dcc.Input(id='solar_size_input', type='number', value=4, step=0.5,
-                                        style={'width': '100%', 'height': '28px', 'padding': '2px'})
-                            ], width=1, className="px-1"),
+                            # # Seventh input
+                            # dbc.Col([
+                            #     html.Label("Solar (kW):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
+                            #     dcc.Input(id='solar_size_input', type='number', value=4, step=0.5,
+                            #             style={'width': '100%', 'height': '28px', 'padding': '2px'})
+                            # ], width=1, className="px-1"),
                         ], className="mb-3 g-0")
                     ])),
                     id="electrification-config-collapse",
@@ -286,7 +286,8 @@ def render_tab_content(active_tab):
                             dbc.Col([
                                 html.Label("Solar Coverage (%):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
                                 dcc.Input(id='solar_coverage_input', type='number', value=90, step=1,
-                                        style={'width': '100%', 'height': '28px', 'padding': '2px'})
+                                        style={'width': '100%', 'height': '28px', 'padding': '2px'}),
+                                dbc.Tooltip("Target % of your electricity usage covered by solar", target="solar_coverage_input")
                             ], width=2, className="px-1"),
 
                             # Roof Space (sq ft)
@@ -300,14 +301,16 @@ def render_tab_content(active_tab):
                             dbc.Col([
                                 html.Label("Tilt (°):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
                                 dcc.Input(id='tilt_input', type='number', value=20, step=1,
-                                        style={'width': '100%', 'height': '28px', 'padding': '2px'})
+                                        style={'width': '100%', 'height': '28px', 'padding': '2px'}),
+                                dbc.Tooltip("Tilt angle of your panels in degrees", target="tilt_input")
                             ], width=1, className="px-1"),
 
                             # Azimuth (degrees)
                             dbc.Col([
                                 html.Label("Azimuth (°):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
                                 dcc.Input(id='azimuth_input', type='number', value=180, step=1,
-                                        style={'width': '100%', 'height': '28px', 'padding': '2px'})
+                                        style={'width': '100%', 'height': '28px', 'padding': '2px'}),
+                                dbc.Tooltip("Direction your panels face (180 = South)", target="azimuth_input")
                             ], width=1, className="px-1"),
 
                             # Array Type
@@ -325,7 +328,8 @@ def render_tab_content(active_tab):
                                     value=1,
                                     clearable=False,
                                     style={'fontSize': '12px'}
-                                )
+                                ),
+                                dbc.Tooltip("Mounting style (e.g. roof or tracking system)", target="array_type_input")
                             ], width=2, className="px-1"),
 
                             # Module Type
@@ -348,7 +352,8 @@ def render_tab_content(active_tab):
                             dbc.Col([
                                 html.Label("System Losses (%):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
                                 dcc.Input(id='losses_input', type='number', value=14, step=1,
-                                        style={'width': '100%', 'height': '28px', 'padding': '2px'})
+                                        style={'width': '100%', 'height': '28px', 'padding': '2px'}),
+                                dbc.Tooltip("System losses from shading, wiring, etc. (as %)", target="losses_input")
                             ], width=2, className="px-1"),
 
                         ], className="mb-3 g-0")
@@ -362,7 +367,8 @@ def render_tab_content(active_tab):
             html.H5("Savings over the next 20 years (assuming 2% annual increase in electricity rates)"),
             dcc.Dropdown(id='plan_selector_solar', placeholder='Select a plan',
                                 style={'width': '50%', 'fontSize': '13px'}),
-            dcc.Graph(id="fig_savings_projection", style={'width': '100%', 'height': '400px'}),
+            html.Div(id="solar-simulation-content-2", className="mt-4"),
+            # dcc.Graph(id="fig_savings_projection", style={'width': '100%', 'height': '400px'}),
         ])
     
     # Default case
@@ -574,10 +580,10 @@ def update_bar(zip_code, kwh_usage, therms_usage, gas_allowance, active_tab):
     # Input('furnace_ratio_input', 'value'),
     # Input('heater_ratio_input', 'value'),
     Input('electrification_pct_input', 'value'),
-    Input('solar_size_input', 'value')
+    # Input('solar_size_input', 'value')
 )
 def update_bar_electrification(active_tab, zip_code, kwh_usage, therms_usage, gas_allowance,
-                             cop, furnace_eff, heater_eff, furnace_ratio, electrification_pct, solar_size):
+                             cop, furnace_eff, heater_eff, furnace_ratio, electrification_pct):
     if active_tab != "tab-electrification":
         raise dash.exceptions.PreventUpdate
 
@@ -597,7 +603,7 @@ def update_bar_electrification(active_tab, zip_code, kwh_usage, therms_usage, ga
     if plans.empty:
         return go.Figure()
     
-    if any(v is None for v in [cop, furnace_eff, heater_eff, furnace_ratio, electrification_pct, solar_size]):
+    if any(v is None for v in [cop, furnace_eff, heater_eff, furnace_ratio, electrification_pct]):
         raise dash.exceptions.PreventUpdate
     
     # --- Convert to decimals ---
@@ -1017,7 +1023,7 @@ def toggle_electrification_collapse(n, is_open):
 
 @app.callback(
     Output("solar-simulation-content", "children"),
-    Output("fig_savings_projection", "figure"),
+    Output("solar-simulation-content-2", "children"),
     Input("tabs", "active_tab"),
     Input("zip_input", "value"),
     Input("kwh_input", "value"),
@@ -1144,6 +1150,18 @@ def update_solar_tab(active_tab, zip_code, monthly_kwh_usage, solar_coverage_rat
         print(accum_cost_with)
         print(accum_cost_without)
 
+    # Total savings over 20 years
+    total_cost_with = accum_cost_with[-1]
+    total_cost_without = accum_cost_without[-1]
+    total_savings = total_cost_without - total_cost_with
+
+    # Estimate payback year
+    payback_year = None
+    for y in range(20):
+        if accum_cost_with[y] < accum_cost_without[y]:
+            payback_year = y + 1  # Year number (1-indexed)
+            break
+
 
     # Create figure
     fig = go.Figure()
@@ -1185,9 +1203,17 @@ def update_solar_tab(active_tab, zip_code, monthly_kwh_usage, solar_coverage_rat
                 dcc.Graph(figure=bar_fig)
             ]), width=6),
         ], className="mb-4"),
-
         html.Hr(),
-    ]), fig
+    ]), html.Div([
+        html.Div([
+            html.H5("Summary of Solar Impact", className="mt-4"),
+            html.Ul([
+                html.Li(f"Estimated Payback Year: {payback_year if payback_year else 'Beyond 20 years'}"),
+                html.Li(f"Total 20-Year Savings: ${int(total_savings):,}")
+            ], style={"fontSize": "14px"})
+        ]),
+        dcc.Graph(figure=fig, style={'width': '100%', 'height': '400px'}),
+    ])
 
                    
 if __name__ == '__main__':

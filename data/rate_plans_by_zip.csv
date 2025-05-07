@@ -1,0 +1,12 @@
+﻿zip,plan,provider,price_per_kwh,emissions_g_per_kwh
+94301,PG&E Base,PG&E,0.28,320
+94301,GreenSource,SJCE,0.26,140
+94301,TotalGreen,SJCE,0.29,0
+94085,GreenStart,SVCE,0.25,160
+94085,GreenPrime,SVCE,0.28,10
+94063,PG&E Base,PG&E,0.27,310
+94063,GreenStart,SVCE,0.24,150
+94063,GreenPrime,SVCE,0.27,20
+95050,PG&E Base,PG&E,0.29,330
+95050,GreenStart,SVCE,0.26,120
+95050,GreenPrime,SVCE,0.3,5
