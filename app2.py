@@ -10,7 +10,7 @@ import calendar
 import os
 
 # Load data
-with open('data/zip_to_plan.json', 'r') as file:
+with open('data/zip_to_energy_plans.json', 'r') as file:
     zip_to_plans = json.load(file)
 
 plan_details_df = pd.read_csv('data/plan_details.csv')
@@ -143,7 +143,7 @@ def render_tab_content(active_tab):
                 html.Div([
                     dcc.Graph(id='plan_comparison', style={'height': '500px'})
                 ], style={
-                    'width': '45%',
+                    'width': '60%',
                     'padding': '3px',
                     'boxSizing': 'border-box'
                 }),
@@ -158,7 +158,7 @@ def render_tab_content(active_tab):
                     dcc.Dropdown(id='plan_selector', placeholder='Select a plan',
                                 style={'width': '100%', 'fontSize': '13px'})
                 ], style={
-                    'width': '45%',
+                    'width': '35%',
                     'padding': '3px',
                     'boxSizing': 'border-box'
                 }),
@@ -529,15 +529,15 @@ def update_bar(zip_code, kwh_usage, therms_usage, gas_allowance, active_tab):
                 range=[0, max(electric_emissions + gas_emissions) * 1.2]  # Dynamic range for emissions
             ),
             legend=dict(
-                x=0.5,
-                y=-0.5,
-                xanchor="center",
-                yanchor="top",
-                orientation='h',
+                x=-0.2,              # Shift legend to the left of the chart
+                y=0.5,               # Vertically centered
+                xanchor="right",     # Anchor legend box by its right edge
+                yanchor="middle",
+                orientation='v',     # Vertical legend
                 bgcolor='rgba(255,255,255,0.8)',
                 bordercolor='lightgray',
                 borderwidth=1,
-                font=dict(size=14)
+                font=dict(size=10)
             ),
             margin=dict(l=80, r=80, t=120, b=80),
             plot_bgcolor='white',
