@@ -7,8 +7,8 @@ cca_plan_map = {
     "San Jose Clean Energy": ["SJCE GreenSource", "SJCE Total Green"],
     "Silicon Valley Clean Energy": ["SVCE GreenStart", "SVCE GreenPrime"],
     "Ava Community Energy": ["Ava Bright Choice", "Ava Renewable 100"],
-    "CleanPowerSF": ["CleanPowerSF SuperGreen", "CleanPowerSF Green (E-1)"],
-    "Peninsula Clean Energy": ["SVCE GreenStart", "SVCE GreenPrime"],
+    "CleanPowerSF": ["CleanPowerSF SuperGreen", "CleanPowerSF Green"],
+    "Peninsula Clean Energy": ["PCE Ecoplus", "PCE Eco100"],
     "MCE Clean Energy": ["MCE Light Green", "MCE Deep Green"],
     "Sonoma Clean Power": ["Sonoma Clean Power CleanStart", "Sonoma Clean Power EverGreen"],
 }
