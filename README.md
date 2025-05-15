@@ -9,9 +9,9 @@ This project is an interactive dashboard that helps California residents simulat
 - Solar ROI modeling based on PV Watts data
 
 ## Files / Folders
-- `app2.py` is the main python script containing the dashoboard components
+- `app2.py` is the main python script containing dashoboard components
 - `make_zip.py` is a script used to generate a json file mapping zipcodes to available plans
-- `data` folder contains all the data used in this project. `plan_details` is where you update electricity rate information (price, power mix, etc).
+- `data` folder contains all the data used in this project. `plan_details.csv` is where you update electricity rate information (price, power mix, etc). `zip_to_energy_plans.json` maps zipcode to available rates.
 
 ## Getting Started
 
@@ -28,4 +28,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Run the app
-python app.py
+python app2.py
+```
+
+
