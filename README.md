@@ -31,4 +31,7 @@ pip install -r requirements.txt
 python app2.py
 ```
 
-
+## Potential Future Additions
+- Precise calculation considering different tiers, subsidies, and seasonality
+- Replacing PV Watts with paid services like Solar API for more granular solar simulation
+- EV adoption simulation
