@@ -4,10 +4,14 @@ This project is an interactive dashboard that helps California residents simulat
 
 ## Features
 
-- Rate plan comparisons across PG&E and major CCAs
+- Rate plan comparisons across PG&E and major CCAs in the Bay Area
 - Emissions and cost simulation for electrification scenarios
-- Solar ROI modeling based on Project Sunroof data
-- Plans to integrate EV and seasonal usage models
+- Solar ROI modeling based on PV Watts data
+
+## Files / Folders
+- `app2.py` is the main python script containing the dashoboard components
+- `make_zip.py` is a script used to generate a json file mapping zipcodes to available plans
+- `data` folder contains all the data used in this project. `plan_details` is where you update electricity rate information (price, power mix, etc).
 
 ## Getting Started
 
