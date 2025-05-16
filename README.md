@@ -17,8 +17,7 @@ This project is an interactive dashboard that helps California residents simulat
 
 ```bash
 # Clone the repo
-git clone https://github.com/YOUR_USERNAME/residential-electrification-dashboard.git
-cd residential-electrification-dashboard
+git clone https://github.com/shinorimax/Acterra
 
 # Set up a virtual environment
 python3 -m venv venv
