@@ -1,36 +1,167 @@
 # Residential Electrification Dashboard
 
-This project is an interactive dashboard that helps California residents simulate the financial and environmental impacts of residential electrification. It compares electricity rate plans (PG&E and CCAs), estimates long-term savings from solar and EV adoption, and models carbon emissions reduction.
+The Residential Electrification Dashboard is an interactive tool that helps California residents simulate and compare the **financial** and **environmental** impacts of residential electrification. The dashboard models utility costs and carbon emissions for various electrification scenarios, compares PG\&E and Community Choice Aggregators (CCAs) rate plans, and estimates the return on investment (ROI) from solar adoption.
+
+This dashboard aims to support household decision-making by providing accessible, localized insights into energy planning.
+
+---
 
 ## Features
 
-- Rate plan comparisons across PG&E and major CCAs in the Bay Area
-- Emissions and cost simulation for electrification scenarios
-- Solar ROI modeling based on PV Watts data
+### Rate Plan Comparison
 
-## Files / Folders
-- `app2.py` is the main python script containing dashboard components
-- `make_zip.py` is a script used to generate a json file mapping zipcodes to available plans
-- `data` folder contains all the data used in this project. `plan_details.csv` is where you update electricity rate information (price, power mix, etc). `zip_to_energy_plans.json` maps zipcode to available rates.
+* Compare rates between **PG\&E** and **major Bay Area CCAs** (e.g., SVCE, EBCE, SJCE).
+* Each plan includes information on price per kWh and the energy mix (renewable, nuclear, fossil).
+* All plans use the **same delivery rate per kWh**, taken from PG\&E’s standard rate schedule. This simplifies comparison but is a limitation addressed in future development plans.
 
-## Getting Started
+### Emissions Estimation
+
+* Emissions per kWh are calculated based on the generation mix of each plan.
+* Carbon intensity values are sourced from:
+
+  * [COWI A/S](https://www.cowi.com/news-and-press/news/2023/comparing-co2-emissions-from-different-energy-sources)
+  * [World Nuclear Association](https://world-nuclear.org/information-library/energy-and-the-environment/carbon-dioxide-emissions-from-electricity), referencing the IPCC.
+* Note: These are **global average values**, not California-specific. Emission estimates are **approximate** and should be interpreted with caution, especially for hydro and biomass where data varies widely.
+
+### Electrification Simulation
+
+* Users can input:
+
+  * **COP (Coefficient of Performance)** of electric systems.
+  * **Efficiency** of gas furnaces and water heaters.
+  * **Electrification percentage** to model partial transitions.
+  * **Gas usage split** between furnace and water heater.
+* The tool computes:
+
+  * **Change in monthly energy cost** due to electrification.
+  * **Change in annual carbon emissions**.
+
+### Solar ROI Modeling
+
+* Uses the **NREL PVWatts API** for location-specific solar output estimation.
+* ZIP codes are converted to latitude/longitude using:
+
+  ```python
+  from geopy.geocoders import Nominatim
+  ```
+* Simulation compares **cumulative energy costs** with and without solar installation, incorporating system degradation and inflation.
+
+---
+
+## Assumptions and Methodology
+
+### Electricity Rate Data
+
+* The data in `plan_details.csv` is taken from the **latest Joint Rate Comparison documents** issued by PG\&E and affiliated CCAs.
+
+  * Example: [SJCE Rate Comparison (PDF)](https://www.pge.com/assets/pge/docs/account/alternate-energy-providers/sjce-rcc.pdf)
+* Delivery charges are fixed across all plans, though actual delivery rates vary by provider and location.
+
+### Emissions Estimation
+
+* CO₂e per kWh values (approximate):
+
+  * Wind: 11 g
+  * Solar PV: 45 g
+  * Nuclear: 12 g
+  * Hydropower: 4–18 g (varies greatly)
+  * Biomass: 200–740 g
+  * Natural Gas: 450–550 g
+  * Coal: 900–1700 g
+* Emissions are computed by weighted averaging the generation mix for each plan.
+
+---
+
+## Solar Savings Calculation
+
+### Overview
+
+We simulate cumulative household energy costs over a 20-year horizon both **with** and **without** solar installation.
+
+### Variables:
+
+* `monthly_kwh_usage`: monthly electricity consumption
+* `price_per_kwh`: electricity price (plan-dependent)
+* `actual_coverage`: % of load covered by solar system
+* `up_front_cost`: cost of solar installation
+* `solar_degradation`: annual degradation rate (0.5%)
+* `electricity_inflation`: annual electricity price inflation (2.2%)
+* `discount_rate`: consumer discount rate (4%)
+
+### Annual Costs:
+
+Let $i$ be the year (1 to 20).
+
+* **With Solar:**
+
+  $$
+  C^{(i)}_{\text{with}} = 12 \cdot \text{monthly\_kwh\_usage} \cdot \text{price\_per\_kwh} \cdot \left(1 - \frac{\text{actual\_coverage}}{100} \cdot (0.995)^i\right) \cdot \left(\frac{1.022}{1.04}\right)^i
+  $$
+
+* **Without Solar:**
+
+  $$
+  C^{(i)}_{\text{without}} = 12 \cdot \text{monthly\_kwh\_usage} \cdot \text{price\_per\_kwh} \cdot \left(\frac{1.022}{1.04}\right)^i
+  $$
+
+### Accumulated Cost Over Time:
+
+* For year 1:
+
+  $$
+  A^{(1)}_{\text{with}} = C^{(1)}_{\text{with}} + \text{up\_front\_cost}
+  \quad\text{and}\quad
+  A^{(1)}_{\text{without}} = C^{(1)}_{\text{without}}
+  $$
+* For $i > 1$:
+
+  $$
+  A^{(i)}_{\text{with}} = A^{(i-1)}_{\text{with}} + C^{(i)}_{\text{with}},\quad
+  A^{(i)}_{\text{without}} = A^{(i-1)}_{\text{without}} + C^{(i)}_{\text{without}}
+  $$
+
+---
+
+## File Structure
 
 ```bash
-# Clone the repo
-git clone https://github.com/shinorimax/Acterra
+residential-electrification-dashboard/
+├── app2.py                       # Main dashboard app (Dash)
+├── make_zip.py                   # ZIP-to-rate-plan preprocessor
+├── data/
+│   ├── plan_details.csv          # Price and emissions data for all plans
+│   └── zip_to_energy_plans.json # ZIP → eligible rate plans
+├── requirements.txt              # Python dependencies
+```
 
-# Set up a virtual environment
+---
+
+## Installation and Usage
+
+```bash
+# Clone repository
+git clone https://github.com/YOUR_USERNAME/residential-electrification-dashboard.git
+cd residential-electrification-dashboard
+
+# Set up environment
 python3 -m venv venv
 source venv/bin/activate
 
-# Install dependencies
+# Install packages
 pip install -r requirements.txt
 
 # Run the app
 python app2.py
 ```
 
-## Potential Future Additions
-- Precise calculation considering different tiers, subsidies, and seasonality
-- Replacing PV Watts with paid services like Solar API for more granular solar simulation
-- EV adoption simulation
+---
+
+## Future Improvements
+
+* Incorporate **tiered electricity rates**, **TOU pricing**, and **seasonal rates** for more accurate billing.
+* Estimate **delivery rate per address** instead of using a fixed average.
+* Improve emissions calculations by collecting **California-specific lifecycle data** for each generation type.
+* Add **EV adoption simulator**, including charging scenarios and marginal cost/emissions.
+* Support downloadable **PDF reports** and historical trend visualizations.
+
+---
