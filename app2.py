@@ -22,7 +22,7 @@ app = dash.Dash(__name__,
                 suppress_callback_exceptions=True)
 
 # App title
-app.title = "Energy Rate Plan Optimizer"
+app.title = "Electricity Rates Comparison Dashboard"
 
 # Create app layout
 app.layout = html.Div([
@@ -183,28 +183,31 @@ def render_tab_content(active_tab):
                 dbc.Collapse(
                     dbc.Card(dbc.CardBody([
                         dbc.Row([
-                            # First input
+                            # COP Input
                             dbc.Col([
-                                html.Label("COP:", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
+                                html.Label("COP:", id='cop_label', style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
                                 dcc.Input(id='cop_input', type='number', value=4, step=0.1,
-                                        style={'width': '100%', 'height': '28px', 'padding': '2px'})
+                                        style={'width': '100%', 'height': '28px', 'padding': '2px'}),
+                                dbc.Tooltip("Coefficient of Performance: efficiency of the heat pump", target="cop_input", placement="top")
                             ], width=1, className="px-1"),
-                            
-                            # Second input
+
+                            # Furnace Efficiency
                             dbc.Col([
-                                html.Label("Furnace Eff (%):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
+                                html.Label("Furnace Eff (%):", id='furnace_label', style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
                                 dcc.Input(id='furnace_eff_input', type='number', value=80, step=1,
-                                        style={'width': '100%', 'height': '28px', 'padding': '2px'})
-                            ], width=2, className="px-1"),
-                            
-                            # Third input
-                            dbc.Col([
-                                html.Label("Water Heater Eff (%):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
-                                dcc.Input(id='heater_eff_input', type='number', value=80, step=1,
-                                        style={'width': '100%', 'height': '28px', 'padding': '2px'})
+                                        style={'width': '100%', 'height': '28px', 'padding': '2px'}),
+                                dbc.Tooltip("Efficiency of gas furnace in % (e.g., 80 means 80%)", target="furnace_eff_input", placement="top")
                             ], width=2, className="px-1"),
 
-                            # Slider to control Furnace vs Water Heater ratio
+                            # Water Heater Efficiency
+                            dbc.Col([
+                                html.Label("Water Heater Eff (%):", id='heater_label', style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
+                                dcc.Input(id='heater_eff_input', type='number', value=80, step=1,
+                                        style={'width': '100%', 'height': '28px', 'padding': '2px'}),
+                                dbc.Tooltip("Efficiency of gas water heater in % (e.g., 80 means 80%)", target="heater_eff_input", placement="top")
+                            ], width=2, className="px-1"),
+
+                            # Furnace vs Water Heater Gas Ratio Slider
                             dbc.Col([
                                 html.Label("Furnace vs Water Heater Gas Ratio (%)", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
                                 dcc.Slider(
@@ -216,14 +219,16 @@ def render_tab_content(active_tab):
                                     marks={0: '0% Furnace', 50: '50 %', 100: '100% Furnace'},
                                     tooltip={"placement": "bottom", "always_visible": True}
                                 ),
+                                dbc.Tooltip("Percentage of gas usage attributed to furnace vs. water heater", target="furnace_ratio_slider", placement="top"),
                                 html.Div(id='furnace_water_ratio_display', style={'fontSize': '10px', 'marginTop': '5px'})
                             ], width=4, className="px-1"),
-                            
-                            # Sixth input
+
+                            # Electrification Percentage
                             dbc.Col([
-                                html.Label("Electrify (%):", style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
+                                html.Label("Electrify (%):", id='electrify_label', style={'fontWeight': 'bold', 'fontSize': '12px', 'marginBottom': '2px'}),
                                 dcc.Input(id='electrification_pct_input', type='number', value=100, step=1,
-                                        style={'width': '100%', 'height': '28px', 'padding': '2px'})
+                                        style={'width': '100%', 'height': '28px', 'padding': '2px'}),
+                                dbc.Tooltip("Percentage of gas systems to electrify (e.g., 100 means full conversion)", target="electrification_pct_input", placement="top")
                             ], width=2, className="px-1"),
                             
                             # # Seventh input
