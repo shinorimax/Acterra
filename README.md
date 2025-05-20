@@ -88,39 +88,44 @@ We simulate cumulative household energy costs over a 20-year horizon both **with
 * `electricity_inflation`: annual electricity price inflation (2.2%)
 * `discount_rate`: consumer discount rate (4%)
 
-### Annual Costs:
+### Solar Savings Calculation
 
-Let $i$ be the year (1 to 20).
+We simulate cumulative household energy costs over a 20-year horizon **with** and **without** solar installation.
 
-* **With Solar:**
+#### Annual Costs
 
-  $$
-  C^{(i)}_{\text{with}} = 12 \cdot \text{monthly\_kwh\_usage} \cdot \text{price\_per\_kwh} \cdot \left(1 - \frac{\text{actual\_coverage}}{100} \cdot (0.995)^i\right) \cdot \left(\frac{1.022}{1.04}\right)^i
-  $$
+The annual electricity cost **with** solar in year `i` is:
 
-* **Without Solar:**
+```
+C_with(i) = 12 * monthly_kwh_usage * price_per_kwh *
+            (1 - (actual_coverage / 100) * (0.995)^i) *
+            (1.022 / 1.04)^i
+```
 
-  $$
-  C^{(i)}_{\text{without}} = 12 \cdot \text{monthly\_kwh\_usage} \cdot \text{price\_per\_kwh} \cdot \left(\frac{1.022}{1.04}\right)^i
-  $$
+The annual electricity cost **without** solar in year `i` is:
 
-### Accumulated Cost Over Time:
+```
+C_without(i) = 12 * monthly_kwh_usage * price_per_kwh *
+               (1.022 / 1.04)^i
+```
 
-* For year 1:
+* `0.995^i` models the 0.5% annual degradation of the solar system.
+* `(1.022 / 1.04)^i` adjusts for electricity price inflation (2.2%) and a consumer discount rate (4%).
 
-  $$
-  A^{(1)}_{\text{with}} = C^{(1)}_{\text{with}} + \text{up\_front\_cost}
-  \quad\text{and}\quad
-  A^{(1)}_{\text{without}} = C^{(1)}_{\text{without}}
-  $$
-* For $i > 1$:
+#### Cumulative Costs
 
-  $$
-  A^{(i)}_{\text{with}} = A^{(i-1)}_{\text{with}} + C^{(i)}_{\text{with}},\quad
-  A^{(i)}_{\text{without}} = A^{(i-1)}_{\text{without}} + C^{(i)}_{\text{without}}
-  $$
+The cumulative cost over time is calculated iteratively:
 
----
+```python
+if i == 1:
+    accum_cost_with = C_with(1) + up_front_cost
+    accum_cost_without = C_without(1)
+else:
+    accum_cost_with = accum_cost_with_prev + C_with(i)
+    accum_cost_without = accum_cost_without_prev + C_without(i)
+```
+
+This allows users to compare total cost with and without solar investment over time, incorporating upfront cost, degradation, inflation, and time value of money.
 
 ## File Structure
 
